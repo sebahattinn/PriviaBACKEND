@@ -3,6 +3,8 @@ package middleware
 import (
 	"net/http"
 
+	"priviatodolist/mockdb"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,10 +12,10 @@ import (
 func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, _ := c.Get("userID")
+		role, exists := mockdb.UserRoles[userID.(string)]
 
-		// Burada admin kontrolü yapmamız lazım. Örnek olarak userID'yi kontrol ediyoruz.
-		// Gerçek senaryoda veritabanından rolü kontrol etmelisin.
-		if userID != 1 { // admin ID'sini sabit olarak 1 kabul ediyoruz
+		// Eğer kullanıcı admin değilse, erişim reddedilsin
+		if !exists || role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin only route"})
 			c.Abort()
 			return

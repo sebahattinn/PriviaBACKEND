@@ -338,6 +338,50 @@ const docTemplate = `{
             }
         },
         "/todolists/{id}/items": {
+            "get": {
+                "description": "Retrieve all items for a specific todo list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "TodoItems"
+                ],
+                "summary": "Get items for a specific todo list",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TodoItem"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Add a new item to a specific todo list",
                 "consumes": [
@@ -407,6 +451,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "deleted_at": {
+                    "description": "Soft delete alanı",
                     "type": "string"
                 },
                 "id": {
@@ -433,6 +478,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "deleted_at": {
+                    "description": "Soft delete alanı",
                     "type": "string"
                 },
                 "id": {

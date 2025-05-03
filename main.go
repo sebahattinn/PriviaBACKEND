@@ -3,6 +3,7 @@ package main
 import (
 	"priviatodolist/controllers"
 	"priviatodolist/docs"
+	"priviatodolist/middleware"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -28,17 +29,28 @@ func main() {
 	// Swagger bilgilerini ayarla
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
+	// JWT doğrulama middleware'ı
+	r.Use(middleware.JWTAuthMiddleware()) // Tüm API'lerde JWT doğrulaması yapılacak
+
 	// API Routes
 	api := r.Group("/api/v1")
 	{
-		api.POST("/todolists", controllers.CreateTodoList)
-		api.GET("/todolists", controllers.GetTodoLists)
-		api.PUT("/todolists/:id", controllers.UpdateTodoList)
-		api.DELETE("/todolists/:id", controllers.DeleteTodoList)
+		// Admin kontrolü gereken rotalar
+		adminRoutes := api.Group("/")
+		adminRoutes.Use(middleware.AdminOnly()) // Sadece admin kullanıcılar erişebilecek
+		{
+			adminRoutes.POST("/todolists", controllers.CreateTodoList)
+			adminRoutes.GET("/todolists", controllers.GetTodoLists)
+			adminRoutes.PUT("/todolists/:id", controllers.UpdateTodoList)
+			adminRoutes.DELETE("/todolists/:id", controllers.DeleteTodoList)
+			adminRoutes.POST("/todolists/:id/items", controllers.AddItemToList)
+			adminRoutes.PUT("/items/:id", controllers.UpdateItem)
+			adminRoutes.DELETE("/items/:id", controllers.DeleteItem)
+		}
 
-		api.POST("/todolists/:id/items", controllers.AddItemToList)
-		api.PUT("/items/:id", controllers.UpdateItem)
-		api.DELETE("/items/:id", controllers.DeleteItem)
+		// Diğer kullanıcılar için erişim sağlanabilir API
+		// Buradaki GET /todolists'i kaldırdık çünkü adminRoutes içinde zaten var
+		api.GET("/todolists/:id/items", controllers.GetItems)
 	}
 
 	// Swagger route

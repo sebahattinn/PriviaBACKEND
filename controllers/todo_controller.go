@@ -192,3 +192,24 @@ func DeleteItem(c *gin.Context) {
 	item.UpdatedAt = now
 	c.JSON(http.StatusOK, gin.H{"message": "Item marked as deleted"})
 }
+
+// GetItems godoc
+// @Summary Get items for a specific todo list
+// @Description Retrieve all items for a specific todo list
+// @Tags TodoItems
+// @Produce json
+// @Param id path int true "Todo List ID"
+// @Success 200 {array} models.TodoItem
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /todolists/{id}/items [get]
+func GetItems(c *gin.Context) {
+	listID, _ := strconv.Atoi(c.Param("id"))
+	list, exists := mockdb.TodoLists[listID]
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{"error": "List not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, list.Items)
+}
