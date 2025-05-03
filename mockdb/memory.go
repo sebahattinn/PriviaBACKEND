@@ -38,10 +38,10 @@ var UserIDs = map[string]int{
 // Todo listelerini temsil eden veritabanı
 var TodoLists = map[int]*models.TodoList{
 	1: {
-		ID:      1,
-		Name:    "Default List",
-		OwnerID: 1,
-		Items: []*models.TodoItem{ // Pointer dizisi kullanılıyor
+		ID:     1,
+		Name:   "Default List",
+		UserID: 1,
+		Items: []*models.TodoItem{
 			{
 				ID:        1,
 				ListID:    1,
@@ -49,6 +49,7 @@ var TodoLists = map[int]*models.TodoList{
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
 			},
 		},
 		Completion: 0,
@@ -57,9 +58,9 @@ var TodoLists = map[int]*models.TodoList{
 		DeletedAt:  nil,
 	},
 	2: {
-		ID:      2,
-		Name:    "Work Tasks",
-		OwnerID: 2,
+		ID:     2,
+		Name:   "Work Tasks",
+		UserID: 2,
 		Items: []*models.TodoItem{
 			{
 				ID:        2,
@@ -68,6 +69,7 @@ var TodoLists = map[int]*models.TodoList{
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
 			},
 			{
 				ID:        3,
@@ -76,6 +78,7 @@ var TodoLists = map[int]*models.TodoList{
 				IsDone:    true,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
 			},
 		},
 		Completion: 50,
@@ -84,9 +87,9 @@ var TodoLists = map[int]*models.TodoList{
 		DeletedAt:  nil,
 	},
 	3: {
-		ID:      3,
-		Name:    "Shopping List",
-		OwnerID: 1,
+		ID:     3,
+		Name:   "Shopping List",
+		UserID: 1,
 		Items: []*models.TodoItem{
 			{
 				ID:        4,
@@ -95,6 +98,7 @@ var TodoLists = map[int]*models.TodoList{
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
 			},
 			{
 				ID:        5,
@@ -103,6 +107,7 @@ var TodoLists = map[int]*models.TodoList{
 				IsDone:    true,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
 			},
 		},
 		Completion: 20,
@@ -167,5 +172,5 @@ var TodoItemIDCounter = 6
 
 // Şu anki UTC zamanını döndüren fonksiyon
 func GetCurrentTime() time.Time {
-	return time.Now().UTC()
+	return time.Now()
 }

@@ -23,6 +23,7 @@ func SetupRouter() *gin.Engine {
 	api.Use(middleware.JWTAuthMiddleware())
 	{
 		// Kullanıcının kendi todolist işlemleri
+		api.GET("/todolists", controllers.GetMyTodoLists)
 		api.POST("/todolists", controllers.CreateTodoList)
 		api.GET("/todolists/:id/items", controllers.GetItems)
 		api.POST("/todolists/:id/items", controllers.AddItemToList)
@@ -35,7 +36,7 @@ func SetupRouter() *gin.Engine {
 		adminOnly := api.Group("/admin")
 		adminOnly.Use(middleware.AdminOnly())
 		{
-			adminOnly.GET("/todolists", controllers.GetTodoLists)
+			adminOnly.GET("/todolists", controllers.GetTodoListsForAdmin)
 		}
 	}
 

@@ -10,17 +10,17 @@ type TodoItem struct {
 	IsDone    bool       `json:"is_done"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at,omitempty"` // Soft delete alanı
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 // TodoList modelindeki silme işlemi
 type TodoList struct {
 	ID         int         `json:"id"`
-	OwnerID    int         `json:"owner_id"`
+	UserID     int         `json:"owner_id"`
 	Name       string      `json:"name"`
 	Items      []*TodoItem `json:"items"`
 	CreatedAt  time.Time   `json:"created_at"`
 	UpdatedAt  time.Time   `json:"updated_at"`
-	DeletedAt  *time.Time  `json:"deleted_at,omitempty"` // Soft delete alanı
+	DeletedAt  *time.Time  `json:"deleted_at"`
 	Completion float32     `json:"completion" default:"0"`
 }
