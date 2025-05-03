@@ -14,7 +14,6 @@ func AdminOnly() gin.HandlerFunc {
 		userID, _ := c.Get("userID")
 		role, exists := mockdb.UserRoles[userID.(string)]
 
-		// Eğer kullanıcı admin değilse, erişim reddedilsin
 		if !exists || role != "admin" {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Admin only route"})
 			c.Abort()

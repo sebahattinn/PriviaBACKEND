@@ -3,75 +3,107 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 )
 
+var jwtSecret []byte
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	secret := os.Getenv("SECRET_KEY")
+	if secret == "" {
+		log.Fatal("SECRET_KEY is not set in the environment")
+	}
+
+	jwtSecret = []byte(secret)
+	log.Println("Secret key loaded successfully") // Geliştiriciye özel log
+}
+
+// JWT Middleware
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Authorization header'ını alıyoruz
 		tokenString := c.GetHeader("Authorization")
 		if tokenString == "" {
-			log.Println("No token provided") // Log: Token sağlanmamış
+			log.Println("No token provided")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "No token provided"})
 			c.Abort()
 			return
 		}
 
-		// Token'ı parse ediyoruz
-		log.Println("Parsing token:", tokenString) // Log: Token çözülmeye çalışılıyor
+		// "Bearer " varsa temizle
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+		log.Println("Parsing token:", tokenString)
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				log.Println("Invalid signing method") // Log: Geçersiz imza metodu
+				log.Println("Invalid signing method")
 				return nil, http.ErrNotSupported
 			}
-			return []byte("your-secret-key"), nil // Burada secret key'inizi kullandığınızı unutmayın
+			return jwtSecret, nil
 		})
 
-		// Token geçersizse hata ver
 		if err != nil || !token.Valid {
-			log.Println("Invalid token:", err) // Log: Geçersiz token hatası
+			log.Println("Invalid token:", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
 
-		// Claims'leri alıyoruz
 		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			log.Println("Invalid token claims") // Log: Geçersiz token claim'leri
+		if !ok {
+			log.Println("Invalid token claims")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			c.Abort()
 			return
 		}
 
-		// Claims'ten username ve role alınıyor
-		log.Println("Token claims parsed successfully") // Log: Claim'ler başarıyla çözüldü
-		c.Set("userID", claims["username"])             // Gerekirse burada claims["userID"] olarak değiştir
+		log.Println("Token claims parsed successfully")
+
+		// 🔧 Burada artık userID int olarak alınıyor, arayüzde string olabilir o yüzden dönüştür
+		userIDFloat, ok := claims["userID"].(float64)
+		if !ok {
+			log.Println("userID not found or not a number")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid userID in token"})
+			c.Abort()
+			return
+		}
+
+		// Token'den "userID" alınıp "ownerID" olarak ayarlanır
+		c.Set("ownerID", int(userIDFloat))
+		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])
 
 		c.Next()
 	}
 }
 
-func GenerateToken(username, role string) (string, error) {
-	// Token oluşturuluyor
-	log.Println("Generating token for username:", username) // Log: Token oluşturuluyor
+// Token Oluşturucu
+func GenerateToken(userID int, username, role string) (string, error) {
+	log.Println("Generating token for userID:", userID, "username:", username)
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID":   userID,
 		"username": username,
 		"role":     role,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(),
+		"exp":      time.Now().Add(72 * time.Hour).Unix(),
 	})
 
-	// Token signed ve string olarak döndürülüyor
-	signedToken, err := token.SignedString([]byte("PriviadaStajYapmakIstiyorumLutfenBeniStajaAlinHemGuzelKodYaziyorum"))
+	signedToken, err := token.SignedString(jwtSecret)
 	if err != nil {
-		log.Println("Error signing token:", err) // Log: Token imzalanırken hata oluştu
+		log.Println("Error signing token:", err)
 		return "", err
 	}
 
-	log.Println("Token generated successfully") // Log: Token başarıyla oluşturuldu
+	log.Println("Token generated successfully")
 	return signedToken, nil
 }

@@ -26,24 +26,40 @@ func Login(c *gin.Context) {
 		Password string `json:"password"`
 	}
 
+	// JSON verilerini kontrol etme
 	if err := c.ShouldBindJSON(&loginData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
+	// Kullanıcı adı ve şifreyi kontrol etme
 	pass, ok := mockdb.Users[loginData.Username]
 	if !ok || pass != loginData.Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
+	// Kullanıcı rolünü al
 	role := mockdb.UserRoles[loginData.Username]
+	if role == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User role not found"})
+		return
+	}
 
-	token, err := middleware.GenerateToken(loginData.Username, role)
+	// Kullanıcı ID'sini al
+	userID := mockdb.UserIDs[loginData.Username]
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+		return
+	}
+
+	// Token üretme
+	token, err := middleware.GenerateToken(userID, loginData.Username, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Token generation failed"})
 		return
 	}
 
+	// Başarılı giriş ve token dönüşü
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }

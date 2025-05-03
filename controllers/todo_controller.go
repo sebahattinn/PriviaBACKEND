@@ -30,6 +30,15 @@ func CreateTodoList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Title must be at least 3 characters"})
 		return
 	}
+
+	// Token'den OwnerID alınır
+	ownerID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	newList.OwnerID = ownerID.(int) // token'den gelen userID burada OwnerID olarak set edilir
 	newList.ID = mockdb.TodoListIDCounter
 	newList.CreatedAt = time.Now()
 	newList.UpdatedAt = time.Now()
@@ -137,7 +146,7 @@ func AddItemToList(c *gin.Context) {
 
 	mockdb.TodoItemIDCounter++
 	mockdb.TodoItems[newItem.ID] = &newItem
-	list.Items = append(list.Items, newItem)
+	list.Items = append(list.Items, &newItem)
 	list.UpdatedAt = time.Now()
 
 	c.JSON(http.StatusCreated, newItem)
