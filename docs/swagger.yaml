@@ -1,0 +1,302 @@
+basePath: /api/v1
+definitions:
+  models.TodoItem:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      is_done:
+        type: boolean
+      list_id:
+        type: integer
+      updated_at:
+        type: string
+    required:
+    - content
+    type: object
+  models.TodoList:
+    properties:
+      completion:
+        type: number
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/models.TodoItem'
+        type: array
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: sebahattin@example.com
+    name: Sebahattin - Developer
+  description: Bu API, yapılacaklar listelerini ve içindeki görevleri yönetmek için
+    geliştirilmiştir.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Privia Todo List API
+  version: "1.0"
+paths:
+  /items/{id}:
+    delete:
+      description: Mark an item as deleted by setting DeletedAt
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Soft delete an item
+      tags:
+      - TodoItems
+    put:
+      consumes:
+      - application/json
+      description: Update an item in the list
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodoItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a todo item
+      tags:
+      - TodoItems
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Kullanıcı adı ve şifre ile giriş yaparak JWT token alır
+      parameters:
+      - description: Kullanıcı Girişi
+        in: body
+        name: credentials
+        required: true
+        schema:
+          properties:
+            password:
+              type: string
+            username:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Hatalı JSON
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Geçersiz kimlik bilgisi
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Token üretimi başarısız
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Kullanıcı girişi yapar
+      tags:
+      - Authentication
+  /todolists:
+    get:
+      description: Retrieve all todo lists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TodoList'
+            type: array
+      summary: Get all todo lists
+      tags:
+      - TodoLists
+    post:
+      consumes:
+      - application/json
+      description: Create a new todo list with a title
+      parameters:
+      - description: Todo List
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodoList'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.TodoList'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new todo list
+      tags:
+      - TodoLists
+  /todolists/{id}:
+    delete:
+      description: Soft delete a todo list by setting DeletedAt
+      parameters:
+      - description: Todo List ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Soft delete a todo list
+      tags:
+      - TodoLists
+    put:
+      consumes:
+      - application/json
+      description: Update a todo list by ID
+      parameters:
+      - description: Todo List ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Todo List
+        in: body
+        name: todo
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodoList'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TodoList'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update a todo list
+      tags:
+      - TodoLists
+  /todolists/{id}/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a new item to a specific todo list
+      parameters:
+      - description: Todo List ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New Item
+        in: body
+        name: item
+        required: true
+        schema:
+          $ref: '#/definitions/models.TodoItem'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.TodoItem'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Add item to a todo list
+      tags:
+      - TodoItems
+swagger: "2.0"
