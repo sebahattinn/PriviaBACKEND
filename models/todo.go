@@ -2,18 +2,7 @@ package models
 
 import "time"
 
-// TodoItem modelindeki silme işlemi
-type TodoItem struct {
-	ID        int        `json:"id"`
-	ListID    int        `json:"list_id"`
-	Content   string     `json:"content" binding:"required"`
-	IsDone    bool       `json:"is_done"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at"`
-}
-
-// TodoList modelindeki silme işlemi
+// TodoList represents a collection of todo items
 type TodoList struct {
 	ID         int         `json:"id"`
 	UserID     int         `json:"owner_id"`
@@ -23,4 +12,16 @@ type TodoList struct {
 	UpdatedAt  time.Time   `json:"updated_at"`
 	DeletedAt  *time.Time  `json:"deleted_at"`
 	Completion float32     `json:"completion" default:"0"`
+}
+
+// TodoItem represents a single task in a todo list
+type TodoItem struct {
+	ID        int        `json:"id"`
+	ListID    int        `json:"list_id"`
+	Title     string     `json:"title"`
+	Content   string     `json:"content"`
+	IsDone    bool       `json:"is_done"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }

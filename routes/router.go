@@ -22,7 +22,7 @@ func SetupRouter() *gin.Engine {
 
 	api.Use(middleware.JWTAuthMiddleware())
 	{
-		// Kullanıcının kendi todolist işlemleri
+		// Kullanıcının kendi todolist işlemleri endpointlerin başına /api/v1 unutulmamalı.
 		api.GET("/todolists", controllers.GetMyTodoLists)
 		api.POST("/todolists", controllers.CreateTodoList)
 		api.GET("/todolists/:id/items", controllers.GetItems)

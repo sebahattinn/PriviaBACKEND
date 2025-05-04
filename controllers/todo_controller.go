@@ -43,6 +43,9 @@ func CreateTodoList(c *gin.Context) {
 	newList.CreatedAt = time.Now()
 	newList.UpdatedAt = time.Now()
 
+	// Completion hesapla
+	CalculateCompletion(&newList)
+
 	mockdb.TodoLists[newList.ID] = &newList
 	mockdb.TodoListIDCounter++
 
@@ -97,6 +100,10 @@ func UpdateTodoList(c *gin.Context) {
 	}
 
 	list.UpdatedAt = time.Now()
+
+	// Completion hesapla
+	CalculateCompletion(list)
+
 	mockdb.TodoLists[id] = list
 	c.JSON(http.StatusOK, list)
 }
@@ -128,6 +135,8 @@ func DeleteTodoList(c *gin.Context) {
 	now := time.Now()
 	list.DeletedAt = &now
 	list.UpdatedAt = now
+
+	mockdb.TodoLists[id] = list
 	c.JSON(http.StatusOK, gin.H{"message": "List marked as deleted"})
 }
 
@@ -172,6 +181,11 @@ func AddItemToList(c *gin.Context) {
 	mockdb.TodoItems[newItem.ID] = &newItem
 	list.Items = append(list.Items, &newItem)
 	list.UpdatedAt = time.Now()
+
+	// Completion hesapla
+	CalculateCompletion(list)
+
+	mockdb.TodoLists[listID] = list
 
 	c.JSON(http.StatusCreated, newItem)
 }
@@ -223,6 +237,10 @@ func UpdateItem(c *gin.Context) {
 
 	// Listeyi de güncellemeyi unutma
 	list.UpdatedAt = time.Now()
+
+	// Completion hesapla
+	CalculateCompletion(list)
+
 	mockdb.TodoLists[item.ListID] = list
 
 	c.JSON(http.StatusOK, item)
@@ -262,6 +280,11 @@ func DeleteItem(c *gin.Context) {
 	item.DeletedAt = &now
 	item.UpdatedAt = now
 	mockdb.TodoItems[id] = item
+
+	// Listeyi güncelle
+	list.UpdatedAt = now
+	CalculateCompletion(list)
+	mockdb.TodoLists[item.ListID] = list
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item marked as deleted"})
 }
@@ -328,4 +351,25 @@ func GetMyTodoLists(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, lists)
+}
+
+func CalculateCompletion(list *models.TodoList) {
+	total := len(list.Items)
+	if total == 0 {
+		// Eğer hiç item yoksa, completion %0 olsun
+		list.Completion = 0
+		return
+	}
+
+	doneCount := 0
+	for _, item := range list.Items {
+		if item.IsDone {
+			doneCount++
+		}
+	}
+
+	// Tamamlanan item'ların oranını hesapla
+	// Eğer doneCount = 0 ise, completion %0 olacak
+	// Eğer doneCount = total ise, completion %100 olacak
+	list.Completion = float32(doneCount) / float32(total) * 100
 }
