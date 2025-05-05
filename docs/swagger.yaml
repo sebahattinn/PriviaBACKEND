@@ -7,27 +7,39 @@ definitions:
       created_at:
         type: string
       deleted_at:
-        description: Soft delete alanı
         type: string
       id:
         type: integer
       is_done:
+        default: false
         type: boolean
       list_id:
         type: integer
       updated_at:
         type: string
-    required:
-    - content
+    type: object
+  models.TodoItemCreate:
+    properties:
+      content:
+        type: string
+      is_done:
+        type: boolean
+    type: object
+  models.TodoItemUpdate:
+    properties:
+      content:
+        type: string
+      is_done:
+        type: boolean
     type: object
   models.TodoList:
     properties:
       completion:
+        default: 0
         type: number
       created_at:
         type: string
       deleted_at:
-        description: Soft delete alanı
         type: string
       id:
         type: integer
@@ -37,10 +49,24 @@ definitions:
         type: array
       name:
         type: string
+      owner_id:
+        type: integer
       updated_at:
         type: string
     type: object
-host: localhost:8080
+  models.TodoListCreate:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  models.TodoListUpdate:
+    properties:
+      name:
+        type: string
+    type: object
+host: localhost:8081
 info:
   contact:
     email: sebahattin@example.com
@@ -54,11 +80,33 @@ info:
   title: Privia Todo List API
   version: "1.0"
 paths:
-  /items/{id}:
-    delete:
-      description: Mark an item as deleted by setting DeletedAt
+  /admin/todolists:
+    get:
+      description: Retrieves all todo lists including deleted ones (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all todo lists
+          schema:
+            items:
+              $ref: '#/definitions/models.TodoList'
+            type: array
+        "401":
+          description: Unauthorized access
+        "500":
+          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Retrieve all todo lists
+      tags:
+      - Admin
+  /admin/todolists/{id}/items:
+    get:
+      description: Retrieves all todo items for the specified list (including deleted
+        ones). Only admin users can access.
       parameters:
-      - description: Item ID
+      - description: Todo List ID
         in: path
         name: id
         required: true
@@ -67,16 +115,47 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: All items in the list
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/models.TodoItem'
+            type: array
+        "403":
+          description: 'Forbidden: Only admin users can access this endpoint'
         "404":
-          description: Not Found
+          description: Todo list not found
+      security:
+      - BearerAuth: []
+      summary: Get all items for a specific list (including deleted ones)
+      tags:
+      - Admin
+  /items/{id}:
+    delete:
+      description: Marks a specific todo item as deleted (soft delete). Not actually
+        deleted, just fills the DeletedAt field.
+      parameters:
+      - description: Todo Item ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Deletion successful
           schema:
             additionalProperties: true
             type: object
-      summary: Soft delete an item
+        "400":
+          description: Item already deleted
+        "403":
+          description: No permission to delete this item
+        "404":
+          description: Todo item not found
+      security:
+      - BearerAuth: []
+      summary: Soft delete a todo item
       tags:
       - TodoItems
     put:
@@ -94,7 +173,7 @@ paths:
         name: item
         required: true
         schema:
-          $ref: '#/definitions/models.TodoItem'
+          $ref: '#/definitions/models.TodoItemUpdate'
       produces:
       - application/json
       responses:
@@ -103,15 +182,11 @@ paths:
           schema:
             $ref: '#/definitions/models.TodoItem'
         "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+          description: Invalid request payload
         "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
+          description: Item not found
+      security:
+      - BearerAuth: []
       summary: Update a todo item
       tags:
       - TodoItems
@@ -119,9 +194,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Kullanıcı adı ve şifre ile giriş yaparak JWT token alır
+      description: Authenticate with username and password to receive a JWT token
       parameters:
-      - description: Kullanıcı Girişi
+      - description: Login Credentials
         in: body
         name: credentials
         required: true
@@ -136,76 +211,67 @@ paths:
       - application/json
       responses:
         "200":
-          description: token
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+          description: Authentication token
         "400":
-          description: Hatalı JSON
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+          description: Invalid JSON or credentials
         "401":
-          description: Geçersiz kimlik bilgisi
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+          description: User role or ID not found
         "500":
-          description: Token üretimi başarısız
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Kullanıcı girişi yapar
+          description: Token generation failed
+      summary: User login
       tags:
       - Authentication
   /todolists:
     get:
-      description: Retrieve all todo lists
+      description: Retrieves all active todo lists for the authenticated user
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User's todo lists
           schema:
             items:
               $ref: '#/definitions/models.TodoList'
             type: array
-      summary: Get all todo lists
+        "401":
+          description: User not authorized
+        "500":
+          description: Failed to retrieve todo lists
+      security:
+      - BearerAuth: []
+      summary: Get user's todo lists
       tags:
       - TodoLists
     post:
       consumes:
       - application/json
-      description: Create a new todo list with a title
+      description: Creates a new todo list for the authenticated user
       parameters:
-      - description: Todo List
+      - description: Todo List details
         in: body
-        name: todo
+        name: todoList
         required: true
         schema:
-          $ref: '#/definitions/models.TodoList'
+          $ref: '#/definitions/models.TodoListCreate'
       produces:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Successfully created todo list
           schema:
             $ref: '#/definitions/models.TodoList'
         "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+          description: Invalid request payload
+        "401":
+          description: User not authorized
+      security:
+      - BearerAuth: []
       summary: Create a new todo list
       tags:
       - TodoLists
   /todolists/{id}:
     delete:
-      description: Soft delete a todo list by setting DeletedAt
+      description: Soft deletes a todo list by setting DeletedAt timestamp
       parameters:
       - description: Todo List ID
         in: path
@@ -216,57 +282,60 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
+          description: List and all its items marked as deleted
+        "400":
+          description: Invalid Todo List ID
+        "401":
+          description: User not authorized
+        "403":
+          description: Forbidden access
         "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Soft delete a todo list
+          description: Todo list not found or already deleted
+      security:
+      - BearerAuth: []
+      summary: Delete a todo list
       tags:
       - TodoLists
     put:
       consumes:
       - application/json
-      description: Update a todo list by ID
+      description: Updates an existing todo list by ID
       parameters:
       - description: Todo List ID
         in: path
         name: id
         required: true
         type: integer
-      - description: Updated Todo List
+      - description: Updated todo list details
         in: body
-        name: todo
+        name: todoList
         required: true
         schema:
-          $ref: '#/definitions/models.TodoList'
+          $ref: '#/definitions/models.TodoListUpdate'
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Successfully updated todo list
           schema:
             $ref: '#/definitions/models.TodoList'
         "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+          description: Invalid request payload
+        "401":
+          description: User not authorized
+        "403":
+          description: Forbidden access
         "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
+          description: Todo list not found
+      security:
+      - BearerAuth: []
       summary: Update a todo list
       tags:
       - TodoLists
   /todolists/{id}/items:
     get:
-      description: Retrieve all items for a specific todo list
+      description: Retrieves non-deleted todo items for the specified list. Users
+        can only access their own lists.
       parameters:
       - description: Todo List ID
         in: path
@@ -277,58 +346,59 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of active todo items
           schema:
             items:
               $ref: '#/definitions/models.TodoItem'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+        "403":
+          description: You don't have permission to access this list
         "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get items for a specific todo list
+          description: List not found
+      security:
+      - BearerAuth: []
+      summary: Get active items for a specific list
       tags:
       - TodoItems
     post:
       consumes:
       - application/json
-      description: Add a new item to a specific todo list
+      description: Adds a new item to a specific todo list. Requires authenticated
+        user access.
       parameters:
       - description: Todo List ID
         in: path
         name: id
         required: true
         type: integer
-      - description: New Item
+      - description: New Item Details
         in: body
         name: item
         required: true
         schema:
-          $ref: '#/definitions/models.TodoItem'
+          $ref: '#/definitions/models.TodoItemCreate'
       produces:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Newly created todo item
           schema:
             $ref: '#/definitions/models.TodoItem'
         "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+          description: Invalid request (e.g., malformed JSON)
+        "403":
+          description: No permission to access this list
         "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Add item to a todo list
+          description: Specified list not found
+      security:
+      - BearerAuth: []
+      summary: Add a new todo item
       tags:
       - TodoItems
+securityDefinitions:
+  BearerAuth:
+    description: Bearer Authentication kullanarak erişim
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

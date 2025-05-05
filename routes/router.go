@@ -17,26 +17,24 @@ func SetupRouter() *gin.Engine {
 
 	// API v1 grubu (JWT korumalı)
 	api := r.Group("/api/v1")
-
 	api.POST("/login", controllers.Login)
-
 	api.Use(middleware.JWTAuthMiddleware())
+	api.Use(middleware.GlobalErrorHandler())
 	{
-		// Kullanıcının kendi todolist işlemleri endpointlerin başına /api/v1 unutulmamalı.
 		api.GET("/todolists", controllers.GetMyTodoLists)
 		api.POST("/todolists", controllers.CreateTodoList)
-		api.GET("/todolists/:id/items", controllers.GetItems)
-		api.POST("/todolists/:id/items", controllers.AddItemToList)
-		api.PUT("/items/:id", controllers.UpdateItem)
-		api.DELETE("/items/:id", controllers.DeleteItem)
+		api.GET("/todolists/:id/items", controllers.GetTodoItems)
+		api.POST("/todolists/:id/items", controllers.AddTodoItem)
+		api.PUT("/items/:id", controllers.UpdateTodoItem)
+		api.DELETE("/items/:id", controllers.DeleteTodoItem)
 		api.PUT("/todolists/:id", controllers.UpdateTodoList)
 		api.DELETE("/todolists/:id", controllers.DeleteTodoList)
 
-		// Sadece admin olanlar tüm todolistleri görebilir
 		adminOnly := api.Group("/admin")
 		adminOnly.Use(middleware.AdminOnly())
 		{
 			adminOnly.GET("/todolists", controllers.GetTodoListsForAdmin)
+			adminOnly.GET("/todolists/:id/items", controllers.GetAllTodoItemsForAdmin)
 		}
 	}
 

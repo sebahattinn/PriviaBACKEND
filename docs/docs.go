@@ -23,8 +23,90 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/todolists": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all todo lists including deleted ones (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Retrieve all todo lists",
+                "responses": {
+                    "200": {
+                        "description": "List of all todo lists",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TodoList"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/admin/todolists/{id}/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all todo items for the specified list (including deleted ones). Only admin users can access.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all items for a specific list (including deleted ones)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Todo List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "All items in the list",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TodoItem"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden: Only admin users can access this endpoint"
+                    },
+                    "404": {
+                        "description": "Todo list not found"
+                    }
+                }
+            }
+        },
         "/items/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an item in the list",
                 "consumes": [
                     "application/json"
@@ -50,7 +132,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.TodoItem"
+                            "$ref": "#/definitions/models.TodoItemUpdate"
                         }
                     }
                 ],
@@ -62,34 +144,31 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Invalid request payload"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Item not found"
                     }
                 }
             },
             "delete": {
-                "description": "Mark an item as deleted by setting DeletedAt",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Marks a specific todo item as deleted (soft delete). Not actually deleted, just fills the DeletedAt field.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "TodoItems"
                 ],
-                "summary": "Soft delete an item",
+                "summary": "Soft delete a todo item",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Item ID",
+                        "description": "Todo Item ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -97,25 +176,27 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Deletion successful",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
+                    "400": {
+                        "description": "Item already deleted"
+                    },
+                    "403": {
+                        "description": "No permission to delete this item"
+                    },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Todo item not found"
                     }
                 }
             }
         },
         "/login": {
             "post": {
-                "description": "Kullanıcı adı ve şifre ile giriş yaparak JWT token alır",
+                "description": "Authenticate with username and password to receive a JWT token",
                 "consumes": [
                     "application/json"
                 ],
@@ -125,10 +206,10 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Kullanıcı girişi yapar",
+                "summary": "User login",
                 "parameters": [
                     {
-                        "description": "Kullanıcı Girişi",
+                        "description": "Login Credentials",
                         "name": "credentials",
                         "in": "body",
                         "required": true,
@@ -147,68 +228,60 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "token",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
+                        "description": "Authentication token"
                     },
                     "400": {
-                        "description": "Hatalı JSON",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
+                        "description": "Invalid JSON or credentials"
                     },
                     "401": {
-                        "description": "Geçersiz kimlik bilgisi",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
+                        "description": "User role or ID not found"
                     },
                     "500": {
-                        "description": "Token üretimi başarısız",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
+                        "description": "Token generation failed"
                     }
                 }
             }
         },
         "/todolists": {
             "get": {
-                "description": "Retrieve all todo lists",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all active todo lists for the authenticated user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "TodoLists"
                 ],
-                "summary": "Get all todo lists",
+                "summary": "Get user's todo lists",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "User's todo lists",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/models.TodoList"
                             }
                         }
+                    },
+                    "401": {
+                        "description": "User not authorized"
+                    },
+                    "500": {
+                        "description": "Failed to retrieve todo lists"
                     }
                 }
             },
             "post": {
-                "description": "Create a new todo list with a title",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new todo list for the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -221,35 +294,39 @@ const docTemplate = `{
                 "summary": "Create a new todo list",
                 "parameters": [
                     {
-                        "description": "Todo List",
-                        "name": "todo",
+                        "description": "Todo List details",
+                        "name": "todoList",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.TodoList"
+                            "$ref": "#/definitions/models.TodoListCreate"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Successfully created todo list",
                         "schema": {
                             "$ref": "#/definitions/models.TodoList"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Invalid request payload"
+                    },
+                    "401": {
+                        "description": "User not authorized"
                     }
                 }
             }
         },
         "/todolists/{id}": {
             "put": {
-                "description": "Update a todo list by ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates an existing todo list by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -269,47 +346,50 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Updated Todo List",
-                        "name": "todo",
+                        "description": "Updated todo list details",
+                        "name": "todoList",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.TodoList"
+                            "$ref": "#/definitions/models.TodoListUpdate"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Successfully updated todo list",
                         "schema": {
                             "$ref": "#/definitions/models.TodoList"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Invalid request payload"
+                    },
+                    "401": {
+                        "description": "User not authorized"
+                    },
+                    "403": {
+                        "description": "Forbidden access"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Todo list not found"
                     }
                 }
             },
             "delete": {
-                "description": "Soft delete a todo list by setting DeletedAt",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft deletes a todo list by setting DeletedAt timestamp",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "TodoLists"
                 ],
-                "summary": "Soft delete a todo list",
+                "summary": "Delete a todo list",
                 "parameters": [
                     {
                         "type": "integer",
@@ -321,32 +401,38 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "List and all its items marked as deleted"
+                    },
+                    "400": {
+                        "description": "Invalid Todo List ID"
+                    },
+                    "401": {
+                        "description": "User not authorized"
+                    },
+                    "403": {
+                        "description": "Forbidden access"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Todo list not found or already deleted"
                     }
                 }
             }
         },
         "/todolists/{id}/items": {
             "get": {
-                "description": "Retrieve all items for a specific todo list",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves non-deleted todo items for the specified list. Users can only access their own lists.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "TodoItems"
                 ],
-                "summary": "Get items for a specific todo list",
+                "summary": "Get active items for a specific list",
                 "parameters": [
                     {
                         "type": "integer",
@@ -358,7 +444,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "List of active todo items",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -366,24 +452,21 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                    "403": {
+                        "description": "You don't have permission to access this list"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "List not found"
                     }
                 }
             },
             "post": {
-                "description": "Add a new item to a specific todo list",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Adds a new item to a specific todo list. Requires authenticated user access.",
                 "consumes": [
                     "application/json"
                 ],
@@ -393,7 +476,7 @@ const docTemplate = `{
                 "tags": [
                     "TodoItems"
                 ],
-                "summary": "Add item to a todo list",
+                "summary": "Add a new todo item",
                 "parameters": [
                     {
                         "type": "integer",
@@ -403,35 +486,30 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "New Item",
+                        "description": "New Item Details",
                         "name": "item",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.TodoItem"
+                            "$ref": "#/definitions/models.TodoItemCreate"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Newly created todo item",
                         "schema": {
                             "$ref": "#/definitions/models.TodoItem"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Invalid request (e.g., malformed JSON)"
+                    },
+                    "403": {
+                        "description": "No permission to access this list"
                     },
                     "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
+                        "description": "Specified list not found"
                     }
                 }
             }
@@ -440,9 +518,6 @@ const docTemplate = `{
     "definitions": {
         "models.TodoItem": {
             "type": "object",
-            "required": [
-                "content"
-            ],
             "properties": {
                 "content": {
                     "type": "string"
@@ -451,14 +526,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "deleted_at": {
-                    "description": "Soft delete alanı",
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "is_done": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "default": false
                 },
                 "list_id": {
                     "type": "integer"
@@ -468,17 +543,39 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TodoItemCreate": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "is_done": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.TodoItemUpdate": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "is_done": {
+                    "type": "boolean"
+                }
+            }
+        },
         "models.TodoList": {
             "type": "object",
             "properties": {
                 "completion": {
-                    "type": "number"
+                    "type": "number",
+                    "default": 0
                 },
                 "created_at": {
                     "type": "string"
                 },
                 "deleted_at": {
-                    "description": "Soft delete alanı",
                     "type": "string"
                 },
                 "id": {
@@ -493,10 +590,40 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "owner_id": {
+                    "type": "integer"
+                },
                 "updated_at": {
                     "type": "string"
                 }
             }
+        },
+        "models.TodoListCreate": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TodoListUpdate": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Bearer Authentication kullanarak erişim",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
@@ -504,7 +631,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8081",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Privia Todo List API",

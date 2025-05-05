@@ -16,10 +16,18 @@ import (
 // @license.name  MIT
 // @license.url   https://opensource.org/licenses/MIT
 
-// @host      localhost:8080
+// @host      localhost:8081
 // @BasePath  /api/v1
+
+// @SecurityDefinitions.apiKey BearerAuth
+// @SecuritySchemeBearer
+// @description Bearer Authentication kullanarak erişim
+// @name Authorization
+// @in header
+// @type apiKey
+
 func main() {
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	r := routes.SetupRouter()
-	r.Run(":8080")
+	r.Run(":8081")
 }

@@ -18,10 +18,26 @@ type TodoList struct {
 type TodoItem struct {
 	ID        int        `json:"id"`
 	ListID    int        `json:"list_id"`
-	Title     string     `json:"title"`
-	Content   string     `json:"content"`
-	IsDone    bool       `json:"is_done"`
+	Content   string     `json:"content" default:""`
+	IsDone    bool       `json:"is_done" default:"false"`
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	DeletedAt *time.Time `json:"deleted_at"`
+}
+
+type TodoItemUpdate struct {
+	Content string `json:"content"`
+	IsDone  bool   `json:"is_done"`
+}
+
+type TodoItemCreate struct {
+	Content string `json:"content"`
+	IsDone  bool   `json:"is_done"`
+}
+
+type TodoListCreate struct {
+	Name string `json:"name" binding:"required"`
+}
+type TodoListUpdate struct {
+	Name string `json:"name"`
 }
