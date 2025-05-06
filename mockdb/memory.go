@@ -39,13 +39,13 @@ var UserIDs = map[string]int{
 var TodoLists = map[int]*models.TodoList{
 	1: {
 		ID:     1,
-		Name:   "Default List",
+		Name:   "Gidilecek yerler",
 		UserID: 1,
 		Items: []*models.TodoItem{
 			{
 				ID:        1,
 				ListID:    1,
-				Content:   "Default Description",
+				Content:   "Okul Gezisi",
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
@@ -59,13 +59,13 @@ var TodoLists = map[int]*models.TodoList{
 	},
 	2: {
 		ID:     2,
-		Name:   "Work Tasks",
+		Name:   "Yapılacak işler",
 		UserID: 2,
 		Items: []*models.TodoItem{
 			{
 				ID:        2,
 				ListID:    2,
-				Content:   "Prepare presentation",
+				Content:   "Kediyi besle",
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
@@ -74,7 +74,7 @@ var TodoLists = map[int]*models.TodoList{
 			{
 				ID:        3,
 				ListID:    2,
-				Content:   "Send emails",
+				Content:   "Odani Topla",
 				IsDone:    true,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
@@ -88,13 +88,13 @@ var TodoLists = map[int]*models.TodoList{
 	},
 	3: {
 		ID:     3,
-		Name:   "Shopping List",
+		Name:   "Market Listesi",
 		UserID: 1,
 		Items: []*models.TodoItem{
 			{
 				ID:        4,
 				ListID:    3,
-				Content:   "Buy milk",
+				Content:   "Süt al",
 				IsDone:    false,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
@@ -103,14 +103,32 @@ var TodoLists = map[int]*models.TodoList{
 			{
 				ID:        5,
 				ListID:    3,
-				Content:   "Buy bread",
+				Content:   "Ekmek Al",
 				IsDone:    true,
 				CreatedAt: GetCurrentTime(),
 				UpdatedAt: GetCurrentTime(),
 				DeletedAt: nil,
 			},
+			{
+				ID:        8,
+				ListID:    3,
+				Content:   "Makarna Al",
+				IsDone:    false,
+				CreatedAt: GetCurrentTime(),
+				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
+			},
+			{
+				ID:        9,
+				ListID:    3,
+				Content:   "Çay al",
+				IsDone:    false,
+				CreatedAt: GetCurrentTime(),
+				UpdatedAt: GetCurrentTime(),
+				DeletedAt: nil,
+			},
 		},
-		Completion: 20,
+		Completion: 25,
 		CreatedAt:  GetCurrentTime(),
 		UpdatedAt:  GetCurrentTime(),
 		DeletedAt:  nil,
@@ -131,7 +149,7 @@ var TodoItems = map[int]*models.TodoItem{
 	2: {
 		ID:        2,
 		ListID:    2,
-		Content:   "Prepare presentation",
+		Content:   "Sunumu Hazurla",
 		IsDone:    false,
 		CreatedAt: GetCurrentTime(),
 		UpdatedAt: GetCurrentTime(),
@@ -140,7 +158,7 @@ var TodoItems = map[int]*models.TodoItem{
 	3: {
 		ID:        3,
 		ListID:    2,
-		Content:   "Send emails",
+		Content:   "Odanı Topla",
 		IsDone:    true,
 		CreatedAt: GetCurrentTime(),
 		UpdatedAt: GetCurrentTime(),
@@ -149,7 +167,7 @@ var TodoItems = map[int]*models.TodoItem{
 	4: {
 		ID:        4,
 		ListID:    3,
-		Content:   "Buy milk",
+		Content:   "Süt al",
 		IsDone:    false,
 		CreatedAt: GetCurrentTime(),
 		UpdatedAt: GetCurrentTime(),
@@ -158,7 +176,7 @@ var TodoItems = map[int]*models.TodoItem{
 	5: {
 		ID:        5,
 		ListID:    3,
-		Content:   "Buy bread",
+		Content:   "Ekmek Al",
 		IsDone:    true,
 		CreatedAt: GetCurrentTime(),
 		UpdatedAt: GetCurrentTime(),

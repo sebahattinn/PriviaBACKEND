@@ -15,7 +15,6 @@ import (
 var jwtSecret []byte
 
 func init() {
-	// .env dosyasını yükleyin
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -27,7 +26,7 @@ func init() {
 	}
 
 	jwtSecret = []byte(secret)
-	log.Println("Secret key loaded successfully") // Geliştiriciye özel log
+	log.Println("Secret key loaded successfully")
 }
 
 // JWT Middleware
@@ -70,7 +69,6 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		log.Println("Token claims parsed successfully")
 
-		// userID'yi float64'tan int'e dönüştürme işlemi
 		userIDFloat, ok := claims["userID"].(float64)
 		if !ok {
 			log.Println("userID not found or not a number")
@@ -80,7 +78,7 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Token'den alınan "userID" ve "role" değerlerini context'e ekle
-		userID := int(userIDFloat) // Burada float64'ü int'e dönüştürüyoruz
+		userID := int(userIDFloat)
 		c.Set("userID", userID)
 		c.Set("username", claims["username"])
 		c.Set("role", claims["role"])
@@ -91,13 +89,11 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-// Token Oluşturucu
 func GenerateToken(userID int, username, role string) (string, error) {
 	log.Println("Generating token for userID:", userID, "username:", username)
 
-	// JWT'yi oluştur
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userID":   userID, // Burada doğrudan int olarak kullanılıyor
+		"userID":   userID,
 		"username": username,
 		"role":     role,
 		"exp":      time.Now().Add(72 * time.Hour).Unix(),

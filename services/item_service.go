@@ -55,7 +55,6 @@ func GetAllItemsForAdmin(listID int) ([]*models.TodoItem, error) {
 	if err != nil {
 		return nil, errors.New("list not found")
 	}
-
 	items, err := repositories.GetItemsByListID(listID, true)
 	if err != nil {
 		return nil, err

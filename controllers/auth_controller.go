@@ -8,18 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Login handles user authentication and JWT token generation
-// @Summary User login
-// @Description Authenticate with username and password to receive a JWT token
-// @Tags Authentication
-// @Accept json
-// @Produce json
-// @Param credentials body object{username=string,password=string} true "Login Credentials"
-// @Success 200 "Authentication token"
-// @Failure 400 "Invalid JSON or credentials"
-// @Failure 401 "User role or ID not found"
-// @Failure 500 "Token generation failed"
-// @Router /login [post]
 func Login(c *gin.Context) {
 	var loginData struct {
 		Username string `json:"username"`

@@ -16,7 +16,6 @@ func ownsList(userID, listID int) bool {
 	return list.UserID == userID
 }
 
-// Yeni bir todo listesi ekle
 func CreateTodoList(userID int, newList *models.TodoList) (*models.TodoList, error) {
 	if len(newList.Name) < 3 {
 		return nil, errors.New("title must be at least 3 characters")
@@ -27,7 +26,6 @@ func CreateTodoList(userID int, newList *models.TodoList) (*models.TodoList, err
 	newList.CreatedAt = time.Now()
 	newList.UpdatedAt = time.Now()
 
-	// Listeni kaydet
 	createdList, err := repositories.CreateTodoList(newList)
 	if err != nil {
 		return nil, err
@@ -39,7 +37,6 @@ func CreateTodoList(userID int, newList *models.TodoList) (*models.TodoList, err
 	return createdList, nil
 }
 
-// Bir todo listesi güncelle
 func UpdateTodoList(listID int, userID int, updatedList *models.TodoList) (*models.TodoList, error) {
 	list, err := repositories.GetTodoListByID(listID)
 	if err != nil {
@@ -51,7 +48,6 @@ func UpdateTodoList(listID int, userID int, updatedList *models.TodoList) (*mode
 		return nil, errors.New("unauthorized")
 	}
 
-	// Güncelleme işlemi
 	list.Name = updatedList.Name
 	list.UpdatedAt = time.Now()
 
@@ -78,7 +74,6 @@ func DeleteTodoList(listID int, userID int) error {
 		return errors.New("unauthorized")
 	}
 
-	// Silme işlemi
 	now := time.Now()
 	list.DeletedAt = &now
 	list.UpdatedAt = now
@@ -95,7 +90,6 @@ func DeleteTodoList(listID int, userID int) error {
 		}
 	}
 
-	// Listemi repository'e kaydet
 	_, err = repositories.UpdateTodoList(listID, list)
 	return err
 }
@@ -107,7 +101,6 @@ func GetMyTodoLists(userID int) ([]*models.TodoList, error) {
 		return nil, err
 	}
 
-	// Her bir liste için completion oranını hesapla
 	for _, list := range lists {
 		CalculateListCompletion(list)
 	}
@@ -122,7 +115,6 @@ func GetAllTodoListsForAdmin() ([]*models.TodoList, error) {
 		return nil, err
 	}
 
-	// Her bir liste için completion oranını hesapla
 	for _, list := range lists {
 		CalculateListCompletion(list)
 	}
@@ -130,7 +122,6 @@ func GetAllTodoListsForAdmin() ([]*models.TodoList, error) {
 	return lists, nil
 }
 
-// Todo listesi için tamamlanma oranını hesapla
 func CalculateListCompletion(list *models.TodoList) {
 	total := len(list.Items)
 	if total == 0 {

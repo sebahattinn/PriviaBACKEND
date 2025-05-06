@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Helper functions
 func getIDParam(c *gin.Context) (int, error) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -27,18 +26,6 @@ func getUserID(c *gin.Context) (int, bool) {
 	return userID.(int), true
 }
 
-// CreateTodoList godoc
-// @Summary Create a new todo list
-// @Description Creates a new todo list for the authenticated user
-// @Tags TodoLists
-// @Accept json
-// @Produce json
-// @Param todoList body models.TodoListCreate true "Todo List details"
-// @Success 201 {object} models.TodoList "Successfully created todo list"
-// @Failure 400 "Invalid request payload"
-// @Failure 401 "User not authorized"
-// @Security BearerAuth
-// @Router /todolists [post]
 func CreateTodoList(c *gin.Context) {
 	var newList models.TodoList
 	if err := c.ShouldBindJSON(&newList); err != nil {
@@ -58,16 +45,6 @@ func CreateTodoList(c *gin.Context) {
 	c.JSON(http.StatusCreated, list)
 }
 
-// GetTodoListsForAdmin godoc
-// @Summary Retrieve all todo lists
-// @Description Retrieves all todo lists including deleted ones (admin only)
-// @Tags Admin
-// @Produce json
-// @Success 200 {array} models.TodoList "List of all todo lists"
-// @Failure 401 "Unauthorized access"
-// @Failure 500 "Internal server error"
-// @Security BearerAuth
-// @Router /admin/todolists [get]
 func GetTodoListsForAdmin(c *gin.Context) {
 	lists, err := services.GetAllTodoListsForAdmin()
 	if err != nil {
@@ -77,21 +54,6 @@ func GetTodoListsForAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, lists)
 }
 
-// UpdateTodoList godoc
-// @Summary Update a todo list
-// @Description Updates an existing todo list by ID
-// @Tags TodoLists
-// @Accept json
-// @Produce json
-// @Param id path int true "Todo List ID"
-// @Param todoList body models.TodoListUpdate true "Updated todo list details"
-// @Success 200 {object} models.TodoList "Successfully updated todo list"
-// @Failure 400 "Invalid request payload"
-// @Failure 401 "User not authorized"
-// @Failure 403 "Forbidden access"
-// @Failure 404 "Todo list not found"
-// @Security BearerAuth
-// @Router /todolists/{id} [put]
 func UpdateTodoList(c *gin.Context) {
 	listID, err := getIDParam(c)
 	if err != nil {
@@ -120,19 +82,6 @@ func UpdateTodoList(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-// DeleteTodoList godoc
-// @Summary Delete a todo list
-// @Description Soft deletes a todo list by setting DeletedAt timestamp
-// @Tags TodoLists
-// @Produce json
-// @Param id path int true "Todo List ID"
-// @Success 200 "List and all its items marked as deleted"
-// @Failure 400 "Invalid Todo List ID"
-// @Failure 401 "User not authorized"
-// @Failure 403 "Forbidden access"
-// @Failure 404 "Todo list not found or already deleted"
-// @Security BearerAuth
-// @Router /todolists/{id} [delete]
 func DeleteTodoList(c *gin.Context) {
 	listID, err := getIDParam(c)
 	if err != nil {
@@ -155,16 +104,6 @@ func DeleteTodoList(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "List and all its items marked as deleted"})
 }
 
-// GetMyTodoLists godoc
-// @Summary Get user's todo lists
-// @Description Retrieves all active todo lists for the authenticated user
-// @Tags TodoLists
-// @Produce json
-// @Success 200 {array} models.TodoList "User's todo lists"
-// @Failure 401 "User not authorized"
-// @Failure 500 "Failed to retrieve todo lists"
-// @Security BearerAuth
-// @Router /todolists [get]
 func GetMyTodoLists(c *gin.Context) {
 	userID, exists := getUserID(c)
 	if !exists {
@@ -179,7 +118,6 @@ func GetMyTodoLists(c *gin.Context) {
 	c.JSON(http.StatusOK, lists)
 }
 
-// CalculateListCompletion calculates the completion percentage of a todo list
 func CalculateListCompletion(list *models.TodoList) {
 	total := len(list.Items)
 	if total == 0 {
