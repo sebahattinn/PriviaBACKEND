@@ -1,27 +1,26 @@
 # 📝 PriviaTodoList - REST API Todo Uygulaması
 
+### 📚 İçindekiler
 
-<h2>📚 İçindekiler</h2>
+`📌` [Genel Bakış](#genel-bakış)  
+`🚀` [Özellikler](#özellikler)  
+`🛠️` [Teknoloji Yığını](#teknoloji-yığını)  
+`🧱` [Mimari](#mimari)  
+`📡` [API ENDPOINTLERİ](#api-endpointleri)  
+`🚀` [Başlangıç](#başlangıç)  
+`📘` [API Dokümantasyonu](#api-dokümantasyonu)  
+`👤` [Admin Kullanıcı](#admin-kullanıcı)  
+`👨‍💻` [Normal Kullanıcı](#normal-kullanıcı)
 
-<div style="display: flex; flex-wrap: wrap; gap: 10px;">
-  <a href="#genel-bakış" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">📌 Genel Bakış</a>
-  <a href="#özellikler" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">🚀 Özellikler</a>
-  <a href="#teknoloji-yığını" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">🛠️ Teknoloji Yığını</a>
-  <a href="#mimari" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">🧱 Mimari</a>
-  <a href="#api-endpointleri" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">📡 API ENDPOINTLERİ</a>
-  <a href="#başlangıç" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">🚀 Başlangıç</a>
-  <a href="#api-dokümantasyonu" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">📘 API Dokümantasyonu</a>
-  <a href="#-yönetici-kullanıcı" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">👤 Admin Kullanıcı</a>
-  <a href="#-normal-kullanıcı" style="padding: 10px 20px; background-color: #f2f2f2; border: 1px solid #ccc; border-radius: 6px; text-decoration: none; color: black;">👨‍💻 Normal Kullanıcı</a>
-</div>
+---
 
-## 📌 Genel Bakış
+## 📌 Genel Bakış <a id="genel-bakış"></a>
 **PriviaTodoList**, kullanıcıların yapılacaklar listesi oluşturup yönetmelerine olanak tanıyan **Go** ile geliştirilmiş bir RESTful API backend servisidir.  
 Kullanıcılar görevlerini takip edebilir, tamamlandı olarak işaretleyebilir ve ilerlemelerini tamamlanma yüzdeleri ile izleyebilirler.
 
 ---
 
-## 🚀 Özellikler
+## 🚀 Özellikler <a id="özellikler"></a>
 
 - ✅ JWT tabanlı kimlik doğrulama  
 - 🧾 Yapılacaklar listesi yönetimi (oluşturma, okuma, güncelleme, silme)  
@@ -33,7 +32,7 @@ Kullanıcılar görevlerini takip edebilir, tamamlandı olarak işaretleyebilir 
 
 ---
 
-## 🛠️ Teknoloji Yığını
+## 🛠️ Teknoloji Yığını <a id="teknoloji-yığını"></a>
 
 - **Dil:** Go  
 - **Framework:** Gin Web Framework  
@@ -43,7 +42,7 @@ Kullanıcılar görevlerini takip edebilir, tamamlandı olarak işaretleyebilir 
 
 ---
 
-## 🧱 Mimari
+## 🧱 Mimari <a id="mimari"></a>
 
 Uygulama, **temiz mimari** desenini takip eder:
 
@@ -88,7 +87,7 @@ Uygulama, **temiz mimari** desenini takip eder:
 
 ---
 
-## 🚀 Başlangıç
+## 🚀 Başlangıç <a id="başlangıç"></a>
 
 ### ✅ Gereksinimler
 
@@ -120,17 +119,17 @@ Uygulama, **temiz mimari** desenini takip eder:
 
 ---
 
-## 📘 API Dokümantasyonu
+## 📘 API Dokümantasyonu <a id="api-dokümantasyonu"></a>
 
 Swagger arayüzüne şu adresten erişebilirsiniz:  
 [`http://localhost:8080/swagger/index.html`](http://localhost:8080/swagger/index.html)
 
 ---
 
-## 👤  Admin Kullanıcı
+## 👤  Admin Kullanıcı <a id="admin-kullanıcı"></a>
 - admin1
 - admin
 
-### 👨‍💻 Normal Kullanıcı
+### 👨‍💻 Normal Kullanıcı <a id="normal-kullanıcı"></a>
 - user1
 - 1234
